@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProductDaoImpl implements ProductDao {
@@ -63,5 +64,41 @@ public class ProductDaoImpl implements ProductDao {
         }else {
             return null;
         }
+    }
+
+    @Override
+    public void updateProductById(Integer productId, ProductRequest productRequest) {
+        String sql = "UPDATE product SET product_name = :productName, category = :category, image_url = :imageUrl," +
+                "price = :price, stock = :stock, description = :description, last_modified_date = :lastModifiedDate," +
+                "status = :status WHERE product_id = :productId";
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("productId",productId);
+
+        map.put("productName",productRequest.getProductName());
+        map.put("category",productRequest.getCategory().toString());
+        map.put("imageUrl",productRequest.getImageUrl());
+        map.put("price",productRequest.getPrice());
+        map.put("stock",productRequest.getStock());
+        map.put("description",productRequest.getDescription());
+        map.put("status",productRequest.getStatus());
+
+        map.put("lastModifiedDate",new Date());
+
+        namedParameterJdbcTemplate.update(sql,map);
+    }
+
+    @Override
+    public void updateStock(Integer productId, Integer stock) {
+        String sql = "UPDATE product SET stock = :stock, last_modified_date = :lastModifiedDate" +
+                " WHERE product_id = :productId ";
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("productId",productId);
+        map.put("stock",stock);
+        map.put("lastModifiedDate",new Date());
+
+        namedParameterJdbcTemplate.update(sql,map);
+
     }
 }
