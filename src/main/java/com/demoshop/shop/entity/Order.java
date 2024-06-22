@@ -13,5 +13,4 @@ public class Order {
     private Date createdDate;
     private  Date lastModifiedDate;
 
-
 }

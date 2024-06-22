@@ -1,20 +1,29 @@
-package com.demoshop.shop.entity;
+package com.demoshop.shop.dto;
 
 import com.demoshop.shop.constant.ProductCategory;
+import com.sun.istack.NotNull;
 import lombok.Data;
 
-import java.util.Date;
 @Data
-public class Product {
+public class ProductRequest {
 
-    private Integer productId;
+    @NotNull
     private String productName;
+
+    @NotNull
     private ProductCategory category;
+
+    @NotNull
     private String imageUrl;
+
+    @NotNull
     private Integer price;
+
+    @NotNull
     private Integer stock;
+
     private String description;
-    private Date createdDate;
-    private Date lastModifiedDate;
-    private String status;
+
+    @NotNull
+    private Integer status;
 }
