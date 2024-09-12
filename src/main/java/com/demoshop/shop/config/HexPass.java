@@ -1,10 +1,9 @@
 package com.demoshop.shop.config;
+import com.demoshop.shop.dao.SaltDao;
+import com.demoshop.shop.entity.Salt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKeyFactory;
@@ -17,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 @Component
 public class HexPass {
@@ -24,27 +24,30 @@ public class HexPass {
     private static final Logger logger = LogManager.getLogger(HexPass.class.getName());
 
     @Autowired
-    private static DataSource dataSource;
+    private  DataSource dataSource;
 
-    public static String encryptHex(String data, int iterationCount, int keyLength)
+    @Autowired
+    private SaltDao saltDao;
+
+    public  String encryptHex(String data, Integer saltId , int iterationCount, int keyLength)
             throws NoSuchAlgorithmException, InvalidKeySpecException, SQLException {
 
+        String saltSql = saltDao.getSaltHex(saltId);
 
-        String sql ="SELECT salt+c_date FROM salt where salt = ? AND NOT STATUS = '99' ";
-        String saltSql = selectString(sql);
+        //String saltSql = selectString(sql);
 
         logger.info("saltSql:{}  ",saltSql);
         return toHex(encryptByte(data, saltSql, iterationCount, keyLength));
     }
 
-
-    private static String selectString(String sql, String... para) throws SQLException {
-        Connection conn = dataSource.getConnection();
-        return selectStringAct(conn,sql,para);
+    private  String selectString(String sql, String... para) throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            return selectStringAct(conn, sql, para);
+        }
     }
 
 
-    private static String toHex(byte[] hash) {
+    private  String toHex(byte[] hash) {
         BigInteger bi = new BigInteger(1, hash);
         String hex = bi.toString(16);
         int paddingLength = (hash.length * 2) - hex.length();
@@ -56,13 +59,13 @@ public class HexPass {
     }
 
 
-    private static byte[] encryptByte(String data, String salt, int iterationCount, int keyLength) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private  byte[] encryptByte(String data, String salt, int iterationCount, int keyLength) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PBEKeySpec spec = new PBEKeySpec(data.toCharArray(), salt.getBytes(), iterationCount, keyLength);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
         return skf.generateSecret(spec).getEncoded();
     }
 
-    private static String selectStringAct(Connection conn, String sql, String... para)
+    private  String selectStringAct(Connection conn, String sql, String... para)
     {
         String result  = "" ;
         PreparedStatement ps = null ;
@@ -95,11 +98,5 @@ public class HexPass {
         }
 
         return result ;
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource dataSource() {
-        return DataSourceBuilder.create().build();
     }
 }

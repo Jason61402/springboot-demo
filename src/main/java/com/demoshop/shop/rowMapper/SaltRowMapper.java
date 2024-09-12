@@ -14,8 +14,9 @@ public class SaltRowMapper implements RowMapper<Salt> {
         Salt salt = new Salt();
         salt.setSaltId(resultSet.getInt("salt_id"));
         salt.setSalt(resultSet.getString("salt"));
-        salt.setCDate(resultSet.getTimestamp("c_date"));
+        salt.setCDate(resultSet.getString("c_date"));
         salt.setStatus(resultSet.getString("status"));
+        //salt.setSaltHex(resultSet.getString("salt_hex"));
 
         return salt;
     }

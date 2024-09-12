@@ -10,7 +10,7 @@ public class Salt {
 
     private String salt;
 
-    private Date cDate;
+    private String cDate;
 
     private String status;
 }

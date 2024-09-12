@@ -6,7 +6,7 @@ import com.demoshop.shop.dao.SaltDao;
 import com.demoshop.shop.dto.MemberLogin;
 import com.demoshop.shop.dto.MemberRegister;
 import com.demoshop.shop.entity.Member;
-import com.demoshop.shop.service.SaltService;
+import com.demoshop.shop.entity.Salt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
+import java.util.UUID;
 
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -26,10 +27,18 @@ public class MemberServiceImpl implements MemberService {
     private static final Logger logger = LogManager.getLogger(MemberServiceImpl.class.getName());
 
     @Autowired
-    private MemberDao memberDao;
-    
+    private HexPass hexPass;
+
     @Autowired
-    private SaltService saltService;
+    private MemberDao memberDao;
+
+    @Autowired
+    private SaltDao saltDao;
+
+    @Override
+    public Member getMemberById(Integer memberId) {
+        return memberDao.getMemberById(memberId);
+    }
 
     @Override
     public Integer register(MemberRegister memberRegister)
@@ -40,16 +49,21 @@ public class MemberServiceImpl implements MemberService {
             logger.warn("該email已有註冊：{}", memberRegister.getEmail());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+        Integer newSalt = saltDao.createSalt2(); // 產生 salt
+        Salt salt = saltDao.getSaltById(newSalt);
+        Integer saltId = salt.getSaltId();
+        logger.info("saltId:{}", saltId);
 
-        saltService.createSalt();
-        String hashPass = HexPass.encryptHex(memberRegister.getPassword(), 1024, 512);
+        //HexPass hex = new HexPass();
+        String hashPass = hexPass.encryptHex(memberRegister.getPassword(), saltId, 1024, 512);
         memberRegister.setPassword(hashPass);
 
-        return null;
+        return memberDao.createMember(memberRegister);
     }
 
     @Override
     public Member login(MemberLogin memberLogin) {
         return null;
     }
+
 }

@@ -1,17 +1,28 @@
 package com.demoshop.shop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 public class Member {
 
-    private String memberId;
+    private Integer memberId;
 
     private String userName;
 
     private String phone;
 
-    private String passWord;
+    @JsonIgnore
+    private String password;
 
     private String email;
+
+    private String status;
+
+    private Date cDate;
+
+    private Date uDate;
+
 }

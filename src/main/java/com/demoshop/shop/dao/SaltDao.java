@@ -4,8 +4,12 @@ import com.demoshop.shop.entity.Salt;
 
 public interface SaltDao {
 
-    Integer createSalt();
+    Integer createSalt(Salt salt);
 
-    Salt getSalt(String salt);
+    Integer createSalt2();
+
+    Salt getSaltById(Integer saltId);
+
+    String getSaltHex(Integer saltId);
 
 }
